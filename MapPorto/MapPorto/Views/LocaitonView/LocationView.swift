@@ -8,23 +8,44 @@
 import SwiftUI
 import MapKit
 
+extension CLLocationCoordinate2D
+{
+    static let parking = CLLocationCoordinate2D(
+        latitude: 41.15,
+        longitude: -8.61024
+    )
+}
+
+extension MKCoordinateRegion
+{
+    static let maia = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(
+            latitude: 41.2329,
+            longitude: -8.62156),
+        span: MKCoordinateSpan(
+            latitudeDelta: 0.5,
+            longitudeDelta: 0.5
+        )
+    )
+    
+    static let nazare = MKCoordinateRegion(
+        center: CLLocationCoordinate2D(
+            latitude: 39.601875,
+            longitude: -9.071212),
+        span: MKCoordinateSpan(
+            latitudeDelta: 0.5,
+            longitudeDelta: 0.5
+        )
+    )
+}
+
+
 struct LocationView: View
 {
     @EnvironmentObject private var vm: LocationViewModel
-    let maxWidthForIpad: CGFloat = 700
-    
     var body: some View {
         ZStack {
-            mapLayer
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-                header
-                    .padding()
-                    .frame(maxWidth: maxWidthForIpad)
-                Spacer()
-                locationPreviewStack
-            }
+            MapLayer(vm: vm)
         }
         .sheet(item: $vm.sheetLocation, onDismiss: nil) { location in
             LocationDetailView(locaiton: location)
@@ -75,43 +96,4 @@ extension LocationView
             y: 15
         )
     }
-    
-    private var mapLayer: some View
-    {
-        
-        Map(coordinateRegion: $vm.mapRegion,
-            annotationItems: vm.locations,
-            annotationContent: { location in
-            MapAnnotation(coordinate: location.coordinates) {
-                LocationMapAnnotationView()
-                    .scaleEffect(vm.mapLocation == location ? 1 : 0.7)
-                    .shadow(radius: 10)
-                    .onTapGesture {
-                        vm.showNextLocation(location: location)
-                    }
-            }
-        })
-        
-    }
-    
-    private var locationPreviewStack: some View
-    {
-        ZStack {
-            ForEach(vm.locations) { location in
-                if vm.mapLocation == location {
-                    LocationPreviewView(location: location)
-                        .shadow(color:.black.opacity(0.3),
-                                radius: 10)
-                        .padding()
-                        .frame(maxWidth: maxWidthForIpad)
-                        .frame(maxWidth: .infinity)
-                        .transition(.asymmetric(
-                            insertion: .move(edge: .trailing),
-                            removal: .move(edge: .leading))
-                        )
-                }
-            }
-        }
-    }
-    
 }
